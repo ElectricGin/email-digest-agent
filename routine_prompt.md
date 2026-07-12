@@ -92,8 +92,12 @@ All commands below run with the project dir as the working directory.
         counts. "I can't attend" / "I have a conflict" — especially in mail **Aiden himself
         sent** (from one of his own 3 addresses) — is a personal attendance change, NOT an
         event cancellation: flag it in the digest, leave the calendar alone.
-      - Never delete or modify an event based on outgoing mail (From: one of Aiden's own
-        addresses) at all. Outgoing mail may be summarized for context, nothing more.
+      - Never create, delete, or modify an event based on outgoing mail (From: one of
+        Aiden's own addresses). Outgoing mail is welcome context for the digest — and if it
+        reveals something calendar-worthy (a commitment Aiden made, a date he proposed), add
+        a `[Suggested event]` bullet to that account's digest section naming the event and
+        date, so Aiden can confirm: he'll ask for it to be added if he wants it. The
+        suggestion lives in the digest text only — it never goes onto the calendar directly.
 
 4. Write the digest into the vault:
    `python write_digest.py --vault-wiki-dir <vault_wiki_dir> --run-date <today, YYYY-MM-DD> --run-label "<run_label>" < digest_body.md`
