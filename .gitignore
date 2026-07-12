@@ -6,3 +6,4 @@ client_secret.json
 digest_runs.log
 digest_body.md
 weekly_entry.md
+.claude/
