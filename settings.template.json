@@ -4,6 +4,7 @@
       "Bash(python:*)",
       "Read",
       "Write",
+      "PushNotification",
       "mcp__claude_ai_Google_Calendar__create_event",
       "mcp__claude_ai_Google_Calendar__search_events",
       "mcp__claude_ai_Google_Calendar__update_event",

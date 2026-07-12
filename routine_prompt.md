@@ -96,6 +96,11 @@ All commands below run with the project dir as the working directory.
 5. Update state for each of the 3 accounts:
    `python record_last_run.py --state-path <state_file> --account-email <email> --epoch <current unix epoch>`
 
+5a. Send a push notification via the `PushNotification` tool with a one-line teaser of the
+    digest (e.g. "3 new items, 1 deadline flagged — check today's digest"). If the tool
+    reports the mobile push wasn't sent, don't retry and don't treat it as an error — the
+    wiki page via Obsidian Sync is the fallback delivery path.
+
 6. Check retention:
    `python find_stale.py --personal-dir <vault_wiki_dir>\Personal`
    This prints a JSON list of stale page paths (may be empty).
@@ -110,8 +115,8 @@ All commands below run with the project dir as the working directory.
       This merges the condensed entry into that page's ISO week's summary file (creating it if
       it's the first page from that week, appending if not) and deletes the daily page.
 
-> Note (2026-07-12): the plan's original Step 6 sent a phone push via the `PushNotification`
-> tool. Pre-Flight Check 2 found Remote Control is not paired ("Mobile push not sent —
-> Remote Control inactive"), so per the plan's fallback that step is dropped and delivery
-> relies on the wiki page + Obsidian Sync. If Remote Control gets paired later, re-add a push
-> step after Step 5 with a one-line teaser of the digest.
+> Note (2026-07-12): the push step was originally dropped when Pre-Flight Check 2 found
+> Remote Control unpaired. Aiden paired Remote Control later the same day (test then returned
+> "Mobile push requested"), so the step is restored above as Step 5a. Whether a headless
+> scheduled session can deliver through the pairing is verified by the first scheduled run —
+> if it consistently can't, Obsidian Sync alone is still fine.
