@@ -51,6 +51,34 @@ All commands below run with the project dir as the working directory.
 
    Write this summary as markdown to a temp file, e.g. `digest_body.md`, using the Write tool.
 
+3a. For each `[Deadline]` or `[Reminder]` bullet identified in Step 3, create a matching Google
+    Calendar event using the `mcp__claude_ai_Google_Calendar__create_event` tool (confirmed via
+    Task 10, Step 1 — note: the connector is authorized as the personal1 account, so events land
+    on that account's primary calendar):
+    - `summary`: the short description from the bullet (e.g. "Chem lab report due").
+    - Date/time: parse from the email's date/subject/snippet. If the email specifies a time,
+      set `startTime` to it (ISO 8601, e.g. `2026-07-17T15:00:00`) and `endTime` one hour
+      later unless the email implies a duration. If only a date is mentioned (no time), create
+      an all-day event: `allDay: true`, `startTime` = that date at `T00:00:00`, `endTime` =
+      the NEXT day at `T00:00:00` (verified convention — renders as a single all-day event).
+    - If the year is ambiguous (e.g. "due Friday" with no explicit date), infer the nearest
+      upcoming occurrence relative to today's date rather than skipping the event.
+    - Skip creating an event for anything vague enough that you can't pin down at least a date
+      (e.g. "sometime next month") — mention it in the digest text instead, don't guess a date
+      just to force an event to exist.
+    - **Skip creating an event if the email itself IS a calendar invite** — judge this from
+      subject and sender only (that's all the data `gmail_fetch.py` actually returns; it
+      fetches headers + snippet, not attachment info, so don't rely on ".ics attachment" as a
+      signal — it isn't visible to you). Look for subjects starting with "Invitation:",
+      "Invite:", "RSVP:", "You're invited:", or a sender clearly in the business of sending
+      event invites (e.g. a band program, Eventbrite, Google Calendar's own invite
+      notifications). Gmail/Google Calendar already auto-adds real invites like these on its
+      own; creating a second event for the same thing produces a duplicate. Still mention it
+      in the digest text as a heads-up, just don't create the redundant event.
+    - If you genuinely can't tell whether something is a native invite from subject/sender
+      alone, err toward creating the event anyway — a rare duplicate is a smaller problem than
+      silently dropping a real deadline.
+
 4. Write the digest into the vault:
    `python write_digest.py --vault-wiki-dir <vault_wiki_dir> --run-date <today, YYYY-MM-DD> --run-label "<run_label>" < digest_body.md`
    where `<run_label>` is `"7:30am Digest"`, `"4:00pm Digest"`, or `"On-Demand Digest"`
