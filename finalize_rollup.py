@@ -12,7 +12,8 @@ def main():
     parser.add_argument("--page-date", required=True, help="YYYY-MM-DD, parsed from the page's filename")
     args = parser.parse_args()
 
-    summary_markdown = sys.stdin.read()
+    # Same Windows cp1252-stdin hazard as write_digest.py — decode UTF-8 explicitly.
+    summary_markdown = sys.stdin.buffer.read().decode("utf-8")
     page_date = datetime.date.fromisoformat(args.page_date)
     week_start, week_end = rollup.week_bounds(page_date)
     weekly_path = rollup.upsert_weekly_summary(args.personal_dir, week_start, week_end, summary_markdown)
