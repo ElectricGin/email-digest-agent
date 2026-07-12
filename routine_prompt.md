@@ -87,6 +87,13 @@ All commands below run with the project dir as the working directory.
       update its time (`mcp__claude_ai_Google_Calendar__update_event`) for a reschedule. If
       zero or multiple candidates match, or you're at all unsure, change nothing on the
       calendar — the digest flag is enough. Never guess at deleting calendar data.
+      Two hard limits on this rule:
+      - Only an **organizer/sender announcement that the event itself** is cancelled or moved
+        counts. "I can't attend" / "I have a conflict" — especially in mail **Aiden himself
+        sent** (from one of his own 3 addresses) — is a personal attendance change, NOT an
+        event cancellation: flag it in the digest, leave the calendar alone.
+      - Never delete or modify an event based on outgoing mail (From: one of Aiden's own
+        addresses) at all. Outgoing mail may be summarized for context, nothing more.
 
 4. Write the digest into the vault:
    `python write_digest.py --vault-wiki-dir <vault_wiki_dir> --run-date <today, YYYY-MM-DD> --run-label "<run_label>" < digest_body.md`
