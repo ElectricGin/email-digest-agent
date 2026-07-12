@@ -78,6 +78,15 @@ All commands below run with the project dir as the working directory.
     - If you genuinely can't tell whether something is a native invite from subject/sender
       alone, err toward creating the event anyway — a rare duplicate is a smaller problem than
       silently dropping a real deadline.
+    - **Cancellations/reschedules (rare, but watch for them):** if an email clearly announces
+      that a previously known event is cancelled or moved (e.g. "rehearsal cancelled",
+      "meeting moved to Tuesday"), flag it in the digest with a `[Cancelled]` or
+      `[Rescheduled]` prefix. Then use `mcp__claude_ai_Google_Calendar__search_events` to look
+      for the matching calendar event: if **exactly one** event clearly matches by title and
+      date, delete it (`mcp__claude_ai_Google_Calendar__delete_event`) for a cancellation, or
+      update its time (`mcp__claude_ai_Google_Calendar__update_event`) for a reschedule. If
+      zero or multiple candidates match, or you're at all unsure, change nothing on the
+      calendar — the digest flag is enough. Never guess at deleting calendar data.
 
 4. Write the digest into the vault:
    `python write_digest.py --vault-wiki-dir <vault_wiki_dir> --run-date <today, YYYY-MM-DD> --run-label "<run_label>" < digest_body.md`
