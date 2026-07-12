@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Read",
+      "Write",
+      "mcp__claude_ai_Google_Calendar__create_event"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\sb737\\Documents\\Obsidian\\Claudy\\wiki",
+      "C:\\Users\\sb737\\.claude\\secrets\\email-digest"
+    ]
+  }
+}
