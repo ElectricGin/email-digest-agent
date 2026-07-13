@@ -1,14 +1,17 @@
 import os
+from datetime import datetime
 
 
 def digest_page_path(vault_wiki_dir, run_date):
-    return os.path.join(vault_wiki_dir, "Personal", f"email-digest-{run_date.isoformat()}.md")
+    return os.path.join(vault_wiki_dir, "Digest", f"email-digest-{run_date.isoformat()}.md")
 
 
-def append_digest_section(vault_wiki_dir, run_date, run_label, body_markdown):
+def append_digest_section(vault_wiki_dir, run_date, run_label, body_markdown, run_time=None):
     path = digest_page_path(vault_wiki_dir, run_date)
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    section = f"\n## {run_label}\n\n{body_markdown}\n"
+    run_time = run_time or datetime.now()
+    compiled_at = run_time.strftime("%#I:%M %p")
+    section = f"\n## {run_label} — compiled {compiled_at}\n\n{body_markdown}\n"
 
     if not os.path.exists(path):
         header = f"# Email Digest — {run_date.isoformat()}\n"
@@ -18,4 +21,22 @@ def append_digest_section(vault_wiki_dir, run_date, run_label, body_markdown):
         with open(path, "a", encoding="utf-8") as f:
             f.write(section)
 
+    return path
+
+
+def today_pointer_path(vault_wiki_dir):
+    return os.path.join(vault_wiki_dir, "Digest", "today.md")
+
+
+def write_today_pointer(vault_wiki_dir, run_date):
+    path = today_pointer_path(vault_wiki_dir)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    content = (
+        "# Today's Digest\n\n"
+        f"![[email-digest-{run_date.isoformat()}]]\n\n"
+        "*Auto-updated by the digest routine — do not edit directly. "
+        "Open this page's Bookmarks entry for one-click access.*\n"
+    )
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
     return path

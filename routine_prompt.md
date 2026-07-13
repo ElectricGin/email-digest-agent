@@ -102,7 +102,14 @@ All commands below run with the project dir as the working directory.
 4. Write the digest into the vault:
    `python write_digest.py --vault-wiki-dir <vault_wiki_dir> --run-date <today, YYYY-MM-DD> --run-label "<run_label>" < digest_body.md`
    where `<run_label>` is `"7:30am Digest"`, `"4:00pm Digest"`, or `"On-Demand Digest"`
-   depending on why this routine is running.
+   depending on why this routine is running. The section header written to the wiki page
+   automatically appends the actual wall-clock time the digest was compiled (e.g.
+   `## On-Demand Digest — compiled 1:20 PM`), so multiple on-demand runs on the same day
+   stay distinguishable — no extra argument needed, `write_digest.py` stamps it itself.
+
+4a. Refresh the one-click "today" pointer page (so Aiden's bookmarked `Digest/today.md` always
+    shows the latest digest, regardless of which dated page it embeds):
+    `python write_today_pointer.py --vault-wiki-dir <vault_wiki_dir> --run-date <today, YYYY-MM-DD>`
 
 5. Update state for each of the 3 accounts:
    `python record_last_run.py --state-path <state_file> --account-email <email> --epoch <current unix epoch>`
@@ -113,8 +120,10 @@ All commands below run with the project dir as the working directory.
     wiki page via Obsidian Sync is the fallback delivery path.
 
 6. Check retention:
-   `python find_stale.py --personal-dir <vault_wiki_dir>\Personal`
-   This prints a JSON list of stale page paths (may be empty).
+   `python find_stale.py --personal-dir <vault_wiki_dir>\Digest`
+   This prints a JSON list of stale page paths (may be empty). (`--personal-dir` is just the
+   flag name from earlier tasks — it now points at `Digest/`, not `Personal/`, since the digest
+   output folder moved 2026-07-13.)
 
 7. For each stale page path returned in Step 6:
    a. Parse the date from its filename (`email-digest-YYYY-MM-DD.md` -> `YYYY-MM-DD`).
@@ -122,7 +131,7 @@ All commands below run with the project dir as the working directory.
    c. Condense it into a few compact bullet points and write them to a temp file, e.g.
       `weekly_entry.md`, using the Write tool.
    d. Run:
-      `python finalize_rollup.py --personal-dir <vault_wiki_dir>\Personal --page-path "<stale page path>" --page-date <date from 7a> < weekly_entry.md`
+      `python finalize_rollup.py --personal-dir <vault_wiki_dir>\Digest --page-path "<stale page path>" --page-date <date from 7a> < weekly_entry.md`
       This merges the condensed entry into that page's ISO week's summary file (creating it if
       it's the first page from that week, appending if not) and deletes the daily page.
 

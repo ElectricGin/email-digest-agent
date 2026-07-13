@@ -17,7 +17,8 @@ def main():
     body_markdown = sys.stdin.buffer.read().decode("utf-8")
     run_date = datetime.date.fromisoformat(args.run_date)
     path = wiki_writer.append_digest_section(
-        args.vault_wiki_dir, run_date, args.run_label, body_markdown
+        args.vault_wiki_dir, run_date, args.run_label, body_markdown,
+        run_time=datetime.datetime.now(),
     )
     print(path)
 
