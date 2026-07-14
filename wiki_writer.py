@@ -11,15 +11,19 @@ def append_digest_section(vault_wiki_dir, run_date, run_label, body_markdown, ru
     os.makedirs(os.path.dirname(path), exist_ok=True)
     run_time = run_time or datetime.now()
     compiled_at = run_time.strftime("%#I:%M %p")
-    section = f"\n## {run_label} — compiled {compiled_at}\n\n{body_markdown}\n"
+    header = f"# Email Digest — {run_date.isoformat()}\n"
+    section = f"## {run_label} — compiled {compiled_at}\n\n{body_markdown}\n"
 
     if not os.path.exists(path):
-        header = f"# Email Digest — {run_date.isoformat()}\n"
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(header + section)
+        older_sections = ""
     else:
-        with open(path, "a", encoding="utf-8") as f:
-            f.write(section)
+        with open(path, encoding="utf-8") as f:
+            existing = f.read()
+        older_sections = existing[len(header):] if existing.startswith(header) else existing
+        older_sections = older_sections.lstrip("\n")
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(header + "\n" + section + (f"\n{older_sections}" if older_sections else ""))
 
     return path
 

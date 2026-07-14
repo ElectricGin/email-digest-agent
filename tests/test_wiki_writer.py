@@ -52,6 +52,19 @@ def test_append_digest_section_distinguishes_multiple_on_demand_runs(tmp_path):
     assert "## On-Demand Digest — compiled 3:45 PM" in content
 
 
+def test_append_digest_section_puts_newest_section_first(tmp_path):
+    wiki_writer.append_digest_section(
+        str(tmp_path), date(2026, 7, 13), "7:30am Digest", "- Morning summary.",
+        run_time=datetime(2026, 7, 13, 7, 31),
+    )
+    path = wiki_writer.append_digest_section(
+        str(tmp_path), date(2026, 7, 13), "4:00pm Digest", "- Afternoon summary.",
+        run_time=datetime(2026, 7, 13, 16, 2),
+    )
+    content = open(path, encoding="utf-8").read()
+    assert content.index("4:00pm Digest") < content.index("7:30am Digest")
+
+
 def test_today_pointer_path_builds_expected_path(tmp_path):
     result = wiki_writer.today_pointer_path(str(tmp_path))
     expected = os.path.join(str(tmp_path), "Digest", "today.md")
