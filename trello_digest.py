@@ -69,3 +69,17 @@ def plan_calendar_actions(state, cards, now, tz=None):
         else:
             actions["forget"].append(card_id)
     return actions
+
+
+def render_trello_section(cards, list_names, tz=None):
+    lines = ["## Trello Deadlines", ""]
+    if not cards:
+        lines.append("- No upcoming Trello deadlines.")
+    for card in cards:
+        due_local = to_local(parse_due(card["due"]), tz)
+        # %#d / %#I are the Windows no-pad flags (same convention as wiki_writer.py).
+        stamp = due_local.strftime("%a %b %#d, %#I:%M %p")
+        list_name = list_names.get(card["idList"], "?")
+        url = card.get("shortUrl") or card["url"]
+        lines.append(f"- **{card['name']}** — due {stamp} ({list_name}) — {url}")
+    return "\n".join(lines) + "\n"

@@ -93,3 +93,19 @@ def test_plan_actions_forgets_unowned_entry_when_card_disappears():
     actions = trello_digest.plan_calendar_actions(state, [], NOW, tz=PACIFIC)
     assert actions["delete"] == []
     assert actions["forget"] == ["gone"]
+
+
+def test_render_section_formats_card_line_in_local_time():
+    card = _card(id_list="l-summer")
+    result = trello_digest.render_trello_section(
+        [card], {"l-summer": "Summer 2026"}, tz=PACIFIC
+    )
+    assert result.startswith("## Trello Deadlines\n\n")
+    assert ("- **Uniform Collection** — due Sun Jul 26, 12:00 PM (Summer 2026) "
+            "— https://trello.com/c/abc") in result
+    assert result.endswith("\n")
+
+
+def test_render_section_when_empty_says_no_deadlines():
+    result = trello_digest.render_trello_section([], {}, tz=PACIFIC)
+    assert "- No upcoming Trello deadlines." in result
