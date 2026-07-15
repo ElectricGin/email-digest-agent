@@ -109,3 +109,25 @@ def test_render_section_formats_card_line_in_local_time():
 def test_render_section_when_empty_says_no_deadlines():
     result = trello_digest.render_trello_section([], {}, tz=PACIFIC)
     assert "- No upcoming Trello deadlines." in result
+
+
+def test_dedup_flags_same_title_same_day():
+    items = [{"title": "[Deadline] Uniform Collection", "date": "2026-07-26"}]
+    result = trello_digest.find_email_duplicates(items, [_card()], tz=PACIFIC)
+    assert result == ["[Deadline] Uniform Collection"]
+
+
+def test_dedup_flags_containment_match_one_day_apart():
+    items = [{"title": "[Reminder] TBC uniform collection!", "date": "2026-07-27"}]
+    result = trello_digest.find_email_duplicates(items, [_card()], tz=PACIFIC)
+    assert result == ["[Reminder] TBC uniform collection!"]
+
+
+def test_dedup_ignores_different_title():
+    items = [{"title": "[Deadline] Chem lab report due", "date": "2026-07-26"}]
+    assert trello_digest.find_email_duplicates(items, [_card()], tz=PACIFIC) == []
+
+
+def test_dedup_ignores_matching_title_far_date():
+    items = [{"title": "[Deadline] Uniform Collection", "date": "2026-07-30"}]
+    assert trello_digest.find_email_duplicates(items, [_card()], tz=PACIFIC) == []

@@ -4,7 +4,12 @@ Card dicts are exactly what mcp__trello__get_board_cards returns. Trello due
 dates are UTC ISO strings with a trailing 'Z' (or null). All datetimes here
 are timezone-aware.
 """
+import re
 from datetime import datetime, timedelta
+from difflib import SequenceMatcher
+
+_PREFIX_RE = re.compile(r"^\s*\[(deadline|reminder)\]\s*", re.IGNORECASE)
+_PUNCT_RE = re.compile(r"[^a-z0-9 ]+")
 
 
 def parse_due(due_iso):
@@ -83,3 +88,32 @@ def render_trello_section(cards, list_names, tz=None):
         url = card.get("shortUrl") or card["url"]
         lines.append(f"- **{card['name']}** — due {stamp} ({list_name}) — {url}")
     return "\n".join(lines) + "\n"
+
+
+def _normalize_title(title):
+    t = _PREFIX_RE.sub("", title.strip().lower())
+    t = _PUNCT_RE.sub(" ", t)
+    return " ".join(t.split())
+
+
+def _titles_match(a, b):
+    na, nb = _normalize_title(a), _normalize_title(b)
+    if not na or not nb:
+        return False
+    if na in nb or nb in na:
+        return True
+    return SequenceMatcher(None, na, nb).ratio() >= 0.75
+
+
+def find_email_duplicates(email_items, cards, tz=None):
+    suppress = []
+    for item in email_items:
+        item_date = datetime.fromisoformat(item["date"]).date()
+        for card in cards:
+            if not card.get("due"):
+                continue
+            card_date = to_local(parse_due(card["due"]), tz).date()
+            if abs((item_date - card_date).days) <= 1 and _titles_match(item["title"], card["name"]):
+                suppress.append(item["title"])
+                break
+    return suppress
