@@ -131,3 +131,26 @@ def test_dedup_ignores_different_title():
 def test_dedup_ignores_matching_title_far_date():
     items = [{"title": "[Deadline] Uniform Collection", "date": "2026-07-30"}]
     assert trello_digest.find_email_duplicates(items, [_card()], tz=PACIFIC) == []
+
+
+def test_apply_state_changes_upserts_and_removes():
+    state = {"old": {"event_id": "ev0", "due": "2026-07-01T00:00:00.000Z", "name": "Old"}}
+    upserts = [
+        {"card_id": "c1", "event_id": "ev1", "due": "2026-07-26T19:00:00.000Z", "name": "Uniform Collection"},
+        {"card_id": "c2", "event_id": None, "due": "2026-08-02T01:00:00.000Z", "name": "Uniform Washing"},
+    ]
+    result = trello_digest.apply_state_changes(state, upserts, ["old", "never-existed"])
+    assert result == {
+        "c1": {"event_id": "ev1", "due": "2026-07-26T19:00:00.000Z", "name": "Uniform Collection"},
+        "c2": {"event_id": None, "due": "2026-08-02T01:00:00.000Z", "name": "Uniform Washing"},
+    }
+
+
+def test_apply_state_changes_overwrites_existing_entry():
+    state = {"c1": {"event_id": "ev1", "due": "2026-07-20T19:00:00.000Z", "name": "Uniform Collection"}}
+    trello_digest.apply_state_changes(
+        state,
+        [{"card_id": "c1", "event_id": "ev1", "due": "2026-07-26T19:00:00.000Z", "name": "Uniform Collection"}],
+        [],
+    )
+    assert state["c1"]["due"] == "2026-07-26T19:00:00.000Z"

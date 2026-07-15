@@ -117,3 +117,15 @@ def find_email_duplicates(email_items, cards, tz=None):
                 suppress.append(item["title"])
                 break
     return suppress
+
+
+def apply_state_changes(state, upserts, removes):
+    for entry in upserts:
+        state[entry["card_id"]] = {
+            "event_id": entry.get("event_id"),
+            "due": entry["due"],
+            "name": entry["name"],
+        }
+    for card_id in removes:
+        state.pop(card_id, None)
+    return state
