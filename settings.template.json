@@ -8,7 +8,9 @@
       "mcp__claude_ai_Google_Calendar__create_event",
       "mcp__claude_ai_Google_Calendar__search_events",
       "mcp__claude_ai_Google_Calendar__update_event",
-      "mcp__claude_ai_Google_Calendar__delete_event"
+      "mcp__claude_ai_Google_Calendar__delete_event",
+      "mcp__trello__get_board_lists",
+      "mcp__trello__get_board_cards"
     ],
     "additionalDirectories": [
       "C:\\Users\\sb737\\Documents\\Obsidian\\Claudy\\wiki",
