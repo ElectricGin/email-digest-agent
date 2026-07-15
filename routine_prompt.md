@@ -101,7 +101,7 @@ All commands below run with the project dir as the working directory.
 
 4. Write the digest into the vault:
    `python write_digest.py --vault-wiki-dir <vault_wiki_dir> --run-date <today, YYYY-MM-DD> --run-label "<run_label>" < digest_body.md`
-   where `<run_label>` is `"7:30am Digest"`, `"4:00pm Digest"`, or `"On-Demand Digest"`
+   where `<run_label>` is `"8:40am Digest"`, `"4:30pm Digest"`, or `"On-Demand Digest"`
    depending on why this routine is running. The section header written to the wiki page
    automatically appends the actual wall-clock time the digest was compiled (e.g.
    `## On-Demand Digest — compiled 1:20 PM`), so multiple on-demand runs on the same day
