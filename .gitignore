@@ -6,4 +6,8 @@ client_secret.json
 digest_runs.log
 digest_body.md
 weekly_entry.md
+trello_cards.json
+trello_ops.json
+dedup_in.json
+dupe_check_in.json
 .claude/
