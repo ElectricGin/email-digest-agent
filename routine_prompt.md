@@ -104,28 +104,40 @@ All commands below run with the project dir as the working directory.
     1. Fetch the board data with the Trello MCP tools:
        - `mcp__trello__get_board_lists` (boardId above, filter `open`)
        - `mcp__trello__get_board_cards` (boardId above, filter `open`)
+       - `mcp__trello__get_board_members` (boardId above)
        **Degrade gracefully:** if the Trello tools are missing from this session, not yet
        permitted, error out, or time out — skip the rest of 3b, and where the Trello section
        would go in `digest_body.md` write exactly:
        `## Trello Deadlines` followed by `- ⚠️ Trello unavailable this run — deadlines not checked.`
        A Trello failure must never abort or delay the email sections.
-    2. Write both results to `trello_cards.json` (Write tool), shaped exactly:
-       `{"lists": <get_board_lists result>, "cards": <get_board_cards result>}`
+    2. Write all three results to `trello_cards.json` (Write tool), shaped exactly:
+       `{"lists": <get_board_lists result>, "cards": <get_board_cards result>, "members": <get_board_members result>}`
     3. Run: `python trello_plan.py --state-path <secrets_dir>\trello_state.json < trello_cards.json`
        Output: `{"actions": {"create": [...], "update": [...], "delete": [...], "forget": [...]},
        "digest_markdown": "..."}`. Each create/update entry carries precomputed local times —
        use them as-is, don't re-derive dates yourself.
-    4. For each `actions.create` entry: check for an existing event first —
-       `mcp__claude_ai_Google_Calendar__search_events` with the card name; if any hit falls on
-       `due_date_local` (a native TBC invite, or an event a previous run created before state
-       tracking), do NOT create a duplicate — note the entry with `event_id: null`. Otherwise
-       `mcp__claude_ai_Google_Calendar__create_event` with `summary` = name, `startTime` =
-       `start_local`, `endTime` = `end_local`, `description` = the card url — note the returned
-       event id.
+    4. For each `actions.create` entry: check for an existing event first. Semantic
+       `search_events` alone is not reliable here — TBC's native invite titles are often worded
+       quite differently from the Trello card name for the same real event (e.g. "Uniform
+       Building Workdays" vs "emergency uniform building workday"), and a plain eyeball check
+       has already missed 5 real duplicates in production (2026-07-24 cleanup). Instead:
+       a. Call `mcp__claude_ai_Google_Calendar__search_events` with the card name (and, if that
+          returns nothing promising, a broader query using just the distinctive words from the
+          card name, e.g. "uniform distribution" instead of "September 27th Uniform Distribution
+          Prep").
+       b. Write `{"card": <the create entry>, "events": <the search_events results list>}` to a
+          temp file and run `python trello_find_dupe.py --tz-offset -7 < that_file` (use `-8` for
+          PST dates, Nov–Mar). It prints the matching event (if any) or `null` — this applies a
+          tested time-proximity + shared-keyword rule instead of ad hoc judgment.
+       c. If it returns a match, do NOT create a duplicate — note the entry with `event_id: null`.
+          Otherwise `mcp__claude_ai_Google_Calendar__create_event` with `summary` = name,
+          `startTime` = `start_local`, `endTime` = `end_local`, `description` = the card url —
+          note the returned event id.
     5. For each `actions.update` entry: `mcp__claude_ai_Google_Calendar__update_event` on its
-       `event_id`, moving it to the new `start_local`/`end_local`. These are always events this
-       routine created — native invites are tracked as `event_id: null` and flow through the
-       create path's existence check instead. Never move an event you don't own.
+       `event_id`, setting `summary` = name, `startTime` = `start_local`, `endTime` = `end_local`.
+       This handles both due-date moves and calendar title changes (e.g. member reassignment).
+       These are always events this routine created — native invites are tracked as `event_id: null`
+       and flow through the create path's existence check instead. Never move an event you don't own.
     6. For each `actions.delete` entry: `mcp__claude_ai_Google_Calendar__delete_event` on its
        `event_id` — that card was archived, closed, or lost its due date.
     7. Record outcomes — write `trello_ops.json` (Write tool):
